@@ -8,6 +8,7 @@
 import SwiftUI
 import CloudKit
 import AuthenticationServices
+import AVFoundation
 
 struct Book: Identifiable {
     let id = UUID()
@@ -22,6 +23,12 @@ struct Novel: Identifiable {
     let name: String
     let date: String
     let color: String
-
     
+}
+struct Books: Identifiable {
+    let id: UUID
+    var title: String
+    var author: String
+    var description: String
+    var textContent: String // النص الكامل للكتاب
 }

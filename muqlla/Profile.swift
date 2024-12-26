@@ -6,41 +6,103 @@
 //
 
 import SwiftUI
+import SwiftUICore
+import _AuthenticationServices_SwiftUI
+import CloudKit
+
+//struct NovelListView: View {
+//    @StateObject private var viewModel = NovelViewModel()
+//    @State private var selectedTab = 0
+//    @State private var selectedNavIndex = 2// Tracks bottom bar selection
+//    
+//    var body: some View {
+//        NavigationView {
+//            VStack(spacing: 0) {
+//                // Top Tabs
+//                TopTabsView(selectedTab: $selectedTab)
+//                
+//                // List of Novels
+//                ScrollView {
+//                    VStack(spacing: 15) {
+//                        ForEach(viewModel.novels) { novel in
+//                            NovelRowView(novel: novel, selectedTab: selectedTab, deleteAction: {
+//                                viewModel.deleteNovel(id: novel.id) // Call delete function
+//                            })
+//                        }
+//                    }
+//                   // .padding(.top, 10)
+//                }
+//                .background(Color.black)
+//                
+//                // Bottom Navigation Bar
+//               // BottomNavBarView(selectedNavIndex: $selectedNavIndex)
+//            }
+//            .navigationBarHidden(true)
+//            .background(Color.black)
+//        }
+//        .preferredColorScheme(.dark)
+//    }
+//}
 
 struct NovelListView: View {
     @StateObject private var viewModel = NovelViewModel()
     @State private var selectedTab = 0
-    @State private var selectedNavIndex = 2// Tracks bottom bar selection
+    @State private var selectedNavIndex = 2
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Top Tabs
                 TopTabsView(selectedTab: $selectedTab)
                 
-                // List of Novels
                 ScrollView {
                     VStack(spacing: 15) {
                         ForEach(viewModel.novels) { novel in
                             NovelRowView(novel: novel, selectedTab: selectedTab, deleteAction: {
-                                viewModel.deleteNovel(id: novel.id) // Call delete function
+                                viewModel.deleteNovel(id: novel.id)
                             })
                         }
                     }
-                   // .padding(.top, 10)
                 }
                 .background(Color.black)
-                
-                // Bottom Navigation Bar
-               // BottomNavBarView(selectedNavIndex: $selectedNavIndex)
             }
             .navigationBarHidden(true)
             .background(Color.black)
+        }
+        .onAppear {
+            viewModel.fetchBooks()
         }
         .preferredColorScheme(.dark)
     }
 }
 
+//class NovelViewModel: ObservableObject {
+//    @Published var novels: [Novel] = []
+//    private let container = CKContainer(identifier: "iCloud.com.a.muqlla")
+//    
+//    func fetchBooks() {
+//        let query = CKQuery(recordType: "Book", predicate: NSPredicate(value: true))
+//        
+//        container.publicCloudDatabase.perform(query, inZoneWith: nil) { [weak self] records, error in
+//            DispatchQueue.main.async {
+//                guard let records = records, error == nil else { return }
+//                
+//                self?.novels = records.map { record in
+//                    Novel(
+//                        id: record.recordID.hashValue,
+//                        name: record["title"] as? String ?? "",
+//                        date: (record["date"] as? Date)?.formatted() ?? "",
+//                        color: "blue"
+//                    )
+//                }
+//            }
+//        }
+//    }
+//    
+//    func deleteNovel(id: Int) {
+//        novels.removeAll { $0.id == id }
+//    }
+//}
+    
 // MARK: - Top Tabs View
 struct TopTabsView: View {
     @Binding var selectedTab: Int
@@ -109,11 +171,14 @@ struct NovelRowView: View {
                     .fill(colorForName(novel.color))
                     .frame(width: 70, height: 90)
                     .cornerRadius(8)
-                    .padding(.leading, 15)
+                    .padding(.leading, 20)
 //                    .padding(.leading, 70)
                     
-                    .padding(.leading, selectedTab == 0 ? -25 : -25)
-                    .padding(.leading, selectedTab != 2 ? 2 : -160)
+                    .padding(.leading, selectedTab == 0 ? -40 : -25)
+                    .padding(.leading, selectedTab != 2 ? 2 : -165)
+                    .padding(.leading, selectedTab != 1 ? 2 : -165)
+
+                
                     .accessibilityLabel("Book Image")
                 
 
@@ -127,6 +192,8 @@ struct NovelRowView: View {
                         .foregroundColor(.white)
                         .padding(.top,-30)
                         .padding(.leading, selectedTab != 2 ? 2 : -100)
+                        .padding(.leading, selectedTab != 1 ? 2 : -100)
+
 //                        .padding(.leading, selectedTab == 2 ? 2 : -100)
 //                        .padding(.leading, -50)
                         .accessibilityLabel("Book Name")
@@ -134,6 +201,8 @@ struct NovelRowView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .padding(.leading, selectedTab != 2 ? 2 : -90)
+                        .padding(.leading, selectedTab != 1 ? 2 : -90)
+
 //                        .padding(.leading, -20)
                         .accessibilityLabel("Book Date")
                         
@@ -143,34 +212,37 @@ struct NovelRowView: View {
                 
                 HStack  {
                  
-                    if selectedTab == 0 || selectedTab == 1  {
-                        Button(action: { }) {
-                            Text("Edit")
-                                .font(.body)
-                                .fontWeight(.medium)
-                                .foregroundColor(.white)
-                                .frame(width: selectedTab == 1 ? 180 : 100, height: 30) // Custom size for Collabs
-                                .background(Color.gray.opacity(0.8)) // Custom color for Collabs
-                                .cornerRadius(8)
-                                .padding(.top, 80)
-                                .padding(.leading, selectedTab == 0 ? -30 : -10)
-                                .accessibilityLabel("Edit")
-                                .accessibilityAddTraits(.isButton)
-                        }
-                    }
-                    
+//                    if selectedTab == 0 || selectedTab == 1  {
+//                        Button(action: { }) {
+//                            Text("Edit")
+//                                .font(.body)
+//                                .fontWeight(.medium)
+//                                .foregroundColor(.white)
+//                                .frame(width: selectedTab == 1 ? 180 : 100, height: 30) // Custom size for Collabs
+//                                .background(Color.gray.opacity(0.8)) // Custom color for Collabs
+//                                .cornerRadius(8)
+//                                .padding(.top, 80)
+//                                .padding(.leading, selectedTab == 0 ? -30 : -10)
+//                                .accessibilityLabel("Edit")
+//                                .accessibilityAddTraits(.isButton)
+//                        }
+//                    }
+//                    
                     if selectedTab == 0 {
                         Button(action: { deleteAction() }) { // Call deleteAction on tap
                             Text("Delete")
                                 .font(.body)
                                 .fontWeight(.medium)
                                 .foregroundColor(.white)
-                                .frame(width: 100, height: 30)
+                                .frame(width: 180, height: 30)
                                 .background(Color.gray.opacity(0.8))
                                 .cornerRadius(8)
                                 .padding(.top, 80)
+                                .padding(.leading,-30)
                                 .accessibilityLabel("Delete")
                                 .accessibilityAddTraits(.isButton)
+                            
+//                                .padding(.leading, selectedTab != 1 ? -50 : -50)
                         }
                     }
                 }
@@ -240,8 +312,8 @@ struct BottomNavButton: View {
 }
 */
 // MARK: - Preview
-struct NovelListView_Previews: PreviewProvider {
-    static var previews: some View {
-        NovelListView()
-    }
-}
+//struct NovelListView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        NovelListView()
+//    }
+//}
